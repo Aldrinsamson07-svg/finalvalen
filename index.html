@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hi Angel</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            background-image: url('b.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* --- GLOBAL LAYOUT --- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex; /* We use flex to center, but we toggle this via JS */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out, filter 1s;
+            opacity: 0; /* Hidden by default */
+            pointer-events: none; /* Click-through when hidden */
+            z-index: 10;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: scale(1);
+            filter: blur(0);
+        }
+
+        /* Transition Effects */
+        .screen.exit-zoom {
+            opacity: 0;
+            transform: scale(2);
+            filter: blur(10px);
+        }
+
+        .screen.exit-fade {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        /* Overlay for readability */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            z-index: -1;
+        }
+
+        /* --- CONTAINERS & TEXT --- */
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 20; /* Above rain */
+            max-width: 600px;
+        }
+
+        h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .highlight-red {
+            color: #ff4757;
+            display: block;
+            font-size: 3.5rem;
+            margin-top: 10px;
+        }
+
+        img.main-gif {
+            width: 200px;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            background-color: #ff4757;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            transition: transform 0.2s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+        }
+
+        .buttons-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            height: 60px; /* Fixed height to keep layout stable */
+        }
+
+        .yes-btn { background-color: #2ecc71; border-radius: 5px; }
+        .no-btn { 
+            background-color: #ff4757; 
+            border-radius: 5px; 
+            position: fixed; /* Allows flying */
+            z-index: 30; /* Top priority */
+            opacity: 0; /* Hidden until calculated */
+            transition: opacity 0.3s;
+        }
+        
+        .no-btn.smooth { transition: left 0.4s ease, top 0.4s ease; }
+
+        /* --- DECORATIONS --- */
+        .corner-deco {
+            position: absolute;
+            width: 150px;
+            z-index: 5;
+        }
+        .top-left { top: 20px; left: 20px; }
+        .bottom-right { bottom: 20px; right: 20px; }
+
+        .heart-icon { color: #e74c3c; font-size: 1.5rem; }
+
+        /* --- RAIN ANIMATIONS --- */
+        .rain-item {
+            position: fixed;
+            top: -150px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .emoji { font-size: 2rem; animation: fall linear forwards; }
+        .photo { 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+            opacity: 0.9;
+            animation: fallPhoto linear forwards;
+        }
+
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+        @keyframes fallPhoto { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(120vh) rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <div id="intro" class="screen active">
+        <div class="container">
+            <img src="hello.gif" alt="Cute Bear" class="main-gif" style="width: 150px;">
+            <h1>Hi Angel,<br>Feb 14 na pala bukas noh?</h1>
+            <button class="btn" onclick="goToAsking()">oo nga e</button>
+        </div>
+    </div>
+
+    <div id="asking" class="screen">
+        <img src="deco.gif" class="corner-deco top-left">
+        <img src="logo.gif" class="corner-deco bottom-right">
+
+        <div class="container">
+            <img src="deco1.gif" alt="Cute Bear" class="main-gif">
+            <h1>
+                tomorrow will be our 3rd Valentine's Day together.<br>
+                I will never get tired of asking...<br>
+                <h1 class="highlight-red">Will you be my Valentine?</h1>
+            </h1>
+            
+            <div class="buttons-group">
+                <button class="btn yes-btn" onclick="goToAccepted()">Yes</button>
+                <button class="btn no-btn" id="noBtn" onmouseover="moveButton()">No</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="accepted" class="screen">
+        <div class="container">
+            <img src="thanks.gif" alt="Happy Bear" class="main-gif" style="width: 250px;">
+            <h1 style="color: #ff4757; font-size: 3.5rem;">YAAAY!</h1>
+            <p style="font-size: 1.2rem; color: #333;">
+                Thank you for accepting me as your Valentine! <br>
+                I love you so much, Angel! <br>
+                <span class="heart-icon">❤️❤️❤️</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const photos = ['photo1.jpg', 'photo2.jpg', 'photo3.jpg', 'photo4.jpg'];
+        const emojis = ['❤️', '💖', '🥰', '😍', '😲', '💕', '💘', '🎉'];
+        
+        // --- NAVIGATION LOGIC ---
+
+        function goToAsking() {
+            // 1. Fade out Intro
+            const introScreen = document.getElementById('intro');
+            introScreen.classList.remove('active');
+            introScreen.classList.add('exit-fade');
+
+            // 2. Wait 1s, then Show Asking
+            setTimeout(() => {
+                introScreen.style.display = 'none'; // Completely hide
+                
+                const askingScreen = document.getElementById('asking');
+                askingScreen.style.display = 'flex'; // Prepare flex layout
+                
+                // Small delay to allow browser to render display:flex before adding opacity
+                setTimeout(() => {
+                    askingScreen.classList.add('active');
+                    
+                    // START EMOJI RAIN HERE
+                    setInterval(createEmoji, 300);
+
+                    // SETUP NO BUTTON
+                    setupNoButton();
+                }, 50);
+
+            }, 1000);
+        }
+
+        function goToAccepted() {
+            // 1. Dreamy Zoom Exit for Asking
+            const askingScreen = document.getElementById('asking');
+            askingScreen.classList.remove('active');
+            askingScreen.classList.add('exit-zoom');
+
+            // 2. Wait 1.2s, then Show Accepted
+            setTimeout(() => {
+                askingScreen.style.display = 'none';
+
+                const acceptedScreen = document.getElementById('accepted');
+                acceptedScreen.style.display = 'flex';
+                
+                setTimeout(() => {
+                    acceptedScreen.classList.add('active');
+                    
+                    // START PHOTO RAIN HERE (Keep emojis running too!)
+                    setInterval(createPhoto, 500);
+                    
+                    // Make emojis fall faster/more frequent for celebration
+                    setInterval(createEmoji, 200); 
+
+                }, 50);
+            }, 1200);
+        }
+
+        // --- BUTTON TRICK LOGIC ---
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.querySelector('.yes-btn');
+
+        function setupNoButton() {
+            const yesRect = yesBtn.getBoundingClientRect();
+            
+            noBtn.style.left = yesRect.left + 'px';
+            noBtn.style.top = yesRect.top + 'px';
+            noBtn.style.width = yesRect.width + 'px';
+            noBtn.style.height = yesRect.height + 'px';
+            noBtn.style.opacity = '1';
+
+            // Add smooth class after a moment
+            setTimeout(() => {
+                noBtn.classList.add('smooth');
+            }, 100);
+        }
+
+        function moveButton() {
+            const w = window.innerWidth - noBtn.offsetWidth;
+            const h = window.innerHeight - noBtn.offsetHeight;
+            const x = Math.floor(Math.random() * w);
+            const y = Math.floor(Math.random() * h);
+            
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+        }
+
+        // --- RAIN GENERATORS ---
+        
+        function createEmoji() {
+            const div = document.createElement('div');
+            div.classList.add('rain-item', 'emoji');
+            div.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            div.style.left = Math.random() * 100 + 'vw';
+            div.style.animationDuration = Math.random() * 2 + 3 + 's';
+            div.style.fontSize = Math.random() * 20 + 20 + 'px';
+
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 5000);
+        }
+
+        function createPhoto() {
+            const img = document.createElement('img');
+            img.classList.add('rain-item', 'photo');
+            img.src = photos[Math.floor(Math.random() * photos.length)];
+            
+            img.style.left = Math.random() * 90 + 'vw';
+            img.style.animationDuration = Math.random() * 4 + 4 + 's';
+            const size = Math.random() * 70 + 80; // 80-150px
+            img.style.width = size + 'px';
+            img.style.height = 'auto';
+
+            document.body.appendChild(img);
+            setTimeout(() => img.remove(), 8000);
+        }
+
+        // Initialize screens hidden (except intro) logic
+        window.onload = function() {
+            document.getElementById('asking').style.display = 'none';
+            document.getElementById('accepted').style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
